@@ -28,39 +28,39 @@ class ModsecurityAuditLogParser
     end
 
     def audit_log_header
-      self['A']
+      @parts['A']
     end
 
     def request_headers
-      self['B']
+      @parts['B']
     end
 
     def request_body
-      self['C']
+      @parts['C']
     end
 
     def original_response_body
-      self['E']
+      @parts['E']
     end
 
     def response_header
-      self['F']
+      @parts['F']
     end
 
     def audit_log_trailer
-      self['H']
+      @parts['H']
     end
 
     def reduced_multipart_request_body
-      self['I']
+      @parts['I']
     end
 
-    def multipart_files_informaion
-      self['J']
+    def multipart_files_information
+      @parts['J']
     end
 
     def matched_rules_information
-      self['K']
+      @parts['K']
     end
 
     def to_h
@@ -103,8 +103,10 @@ class ModsecurityAuditLogParser
       raise
     end
 
-    def merge(hash)
-      self.dup.merge!(hash)
+    def to_hash
+      hash = {}
+      merge!(hash)
+      hash
     end
 
     def merge!(hash)
@@ -173,7 +175,7 @@ class ModsecurityAuditLogParser
     register('F', self)
 
     def merge!(hash)
-      hash[:response_header] = @content
+      hash[:response_headers] = @content
     end
   end
 
@@ -189,18 +191,18 @@ class ModsecurityAuditLogParser
     def add(line)
       key, value = line.chomp.split(/: /, 2)
       if key == 'Message'
-        (@trailers[key] ||= '') << value << "\n"
+        (@trailers[:Message] ||= '') << value << "\n"
       elsif key
-        @trailers[key] = value
+        @trailers[key.intern] = value
       end
     end
 
     def rules
-      if pairs = @trailers['Message']&.scan(/\[(\w+) "([^\\"]*(?:\\.[^\\"]*)*)"\]/)
-        pairs.each do |k, v|
-          k.replace("rule_#{k}")
-        end
-        Hash[pairs]
+      if pairs = @trailers[:Message]&.scan(/\[(\w+) "([^\\"]*(?:\\.[^\\"]*)*)"\]/)
+        pairs.inject({}) { |r, (k, v)|
+          r["rule_#{k}".intern] = v
+          r
+        }
       end
     end
 
@@ -273,18 +275,16 @@ class ModsecurityAuditLogParser
     end
   end
 
-  def records
-    @records
+  def shift(*a)
+    @records.shift(*a)
   end
 end
 
 
 if $0 == __FILE__
-  parser = ModsecurityAuditLogParser.new('AH')
-  start = Time.now
+  parser = ModsecurityAuditLogParser.new
   parser.parse(ARGF)
-  p Time.now - start
-  parser.records.each do |log|
-    p log.to_h.keys.size
+  parser.shift(100).each do |log|
+    p log.to_h
   end
 end
