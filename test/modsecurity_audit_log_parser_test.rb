@@ -33,6 +33,8 @@ class AuditLogHeaderPartTest < Minitest::Test
 end
 
 class RequestHeadersPartTest < Minitest::Test
+  include PartTestHelper
+
   CONTENT = <<__EOM__
 GET /system/v1/status HTTP/1.1
 host: 123.45.67.8:1234
@@ -43,19 +45,13 @@ Connection: keep-alive
 __EOM__
 
   def test_add
-    part = ModsecurityAuditLogParser::RequestHeadersPart.new
-    CONTENT.each_line do |line|
-      part.add(line)
-    end
+    part = add(ModsecurityAuditLogParser::RequestHeadersPart.new, CONTENT)
     assert_equal 'B', part.type
     assert_equal CONTENT, part.content
   end
 
   def test_hash
-    part = ModsecurityAuditLogParser::RequestHeadersPart.new
-    CONTENT.each_line do |line|
-      part.add(line)
-    end
+    part = add(ModsecurityAuditLogParser::RequestHeadersPart.new, CONTENT)
     assert_equal(
       {request_headers: CONTENT},
       {}.merge(part)
@@ -64,18 +60,18 @@ __EOM__
 end
 
 class RequestBodyPartTest < Minitest::Test
+  include PartTestHelper
+
   CONTENT = '{"nahi":"nahi"}'
 
   def test_add
-    part = ModsecurityAuditLogParser::RequestBodyPart.new
-    part.add(CONTENT)
+    part = add(ModsecurityAuditLogParser::RequestBodyPart.new, CONTENT)
     assert_equal 'C', part.type
     assert_equal CONTENT, part.content
   end
 
   def test_hash
-    part = ModsecurityAuditLogParser::RequestBodyPart.new
-    part.add(CONTENT)
+    part = add(ModsecurityAuditLogParser::RequestBodyPart.new, CONTENT)
     assert_equal(
       {request_body: CONTENT},
       {}.merge(part)
@@ -84,18 +80,18 @@ class RequestBodyPartTest < Minitest::Test
 end
 
 class OriginalResponseBodyPartTest < Minitest::Test
+  include PartTestHelper
+
   CONTENT = '{"nahi":"nahi"}'
 
   def test_add
-    part = ModsecurityAuditLogParser::OriginalResponseBodyPart.new
-    part.add(CONTENT)
+    part = add(ModsecurityAuditLogParser::OriginalResponseBodyPart.new, CONTENT)
     assert_equal 'E', part.type
     assert_equal CONTENT, part.content
   end
 
   def test_hash
-    part = ModsecurityAuditLogParser::OriginalResponseBodyPart.new
-    part.add(CONTENT)
+    part = add(ModsecurityAuditLogParser::OriginalResponseBodyPart.new, CONTENT)
     assert_equal(
       {original_response_body: CONTENT},
       {}.merge(part)
@@ -104,6 +100,8 @@ class OriginalResponseBodyPartTest < Minitest::Test
 end
 
 class ResponseHeadersPartTest < Minitest::Test
+  include PartTestHelper
+
   CONTENT = <<__EOM__
 HTTP/1.1 400 Bad Request
 Server: Nahi server
@@ -114,19 +112,13 @@ Connection: keep-alive
 __EOM__
 
   def test_add
-    part = ModsecurityAuditLogParser::ResponseHeadersPart.new
-    CONTENT.each_line do |line|
-      part.add(line)
-    end
+    part = add(ModsecurityAuditLogParser::ResponseHeadersPart.new, CONTENT)
     assert_equal 'F', part.type
     assert_equal CONTENT, part.content
   end
 
   def test_hash
-    part = ModsecurityAuditLogParser::ResponseHeadersPart.new
-    CONTENT.each_line do |line|
-      part.add(line)
-    end
+    part = add(ModsecurityAuditLogParser::ResponseHeadersPart.new, CONTENT)
     assert_equal(
       {response_headers: CONTENT},
       {}.merge(part)
@@ -135,6 +127,8 @@ __EOM__
 end
 
 class AuditLogTrailerPartTest < Minitest::Test
+  include PartTestHelper
+
   CONTENT = <<__EOM__
 Message: Warning. Match of "eq 0" against "REQBODY_ERROR" required. [file "/path/to/conf.d/modsecurity.conf"] [line "60"] [id "200002"] [msg "Failed to parse request body."] [data ""] [severity "CRITICAL"]
 Message: Warning. Match of "eq 0" against "REQBODY_ERROR" required. [file "/path/to/conf.d/owasp-modsecurity-crs/rules/REQUEST-920-PROTOCOL-ENFORCEMENT.conf"] [line "157"] [id "920130"] [rev "1"] [msg "Failed to parse request body."] [data ""] [severity "CRITICAL"] [ver "OWASP_CRS/3.0.0"] [maturity "9"] [accuracy "9"] [tag "application-multi"] [tag "language-multi"] [tag "platform-multi"] [tag "attack-protocol"] [tag "OWASP_CRS/PROTOCOL_VIOLATION/INVALID_REQ"] [tag "CAPEC-272"]
@@ -149,10 +143,7 @@ Engine-Mode: "DETECTION_ONLY"
 __EOM__
 
   def test_add
-    part = ModsecurityAuditLogParser::AuditLogTrailerPart.new
-    CONTENT.each_line do |line|
-      part.add(line)
-    end
+    part = add(ModsecurityAuditLogParser::AuditLogTrailerPart.new, CONTENT)
     assert_equal 'H', part.type
     assert_equal(
       "Warning. Match of \"eq 0\" against \"REQBODY_ERROR\" required. [file \"/path/to/conf.d/modsecurity.conf\"] [line \"60\"] [id \"200002\"] [msg \"Failed to parse request body.\"] [data \"\"] [severity \"CRITICAL\"]
@@ -169,10 +160,7 @@ Warning. Match of \"eq 0\" against \"REQBODY_ERROR\" required. [file \"/path/to/
   end
 
   def test_rules
-    part = ModsecurityAuditLogParser::AuditLogTrailerPart.new
-    CONTENT.each_line do |line|
-      part.add(line)
-    end
+    part = add(ModsecurityAuditLogParser::AuditLogTrailerPart.new, CONTENT)
     assert_equal(
       {
         rule_file: "/path/to/conf.d/owasp-modsecurity-crs/rules/REQUEST-920-PROTOCOL-ENFORCEMENT.conf",
@@ -201,25 +189,21 @@ Warning. Match of \"eq 0\" against \"REQBODY_ERROR\" required. [file \"/path/to/
 end
 
 class ReducedMultipartRequestBodyPartTest < Minitest::Test
+  include PartTestHelper
+
   CONTENT = <<__EOM__
 TODO: not captured yet
 
 __EOM__
 
   def test_add
-    part = ModsecurityAuditLogParser::ReducedMultipartRequestBodyPart.new
-    CONTENT.each_line do |line|
-      part.add(line)
-    end
+    part = add(ModsecurityAuditLogParser::ReducedMultipartRequestBodyPart.new, CONTENT)
     assert_equal 'I', part.type
     assert_equal CONTENT, part.content
   end
 
   def test_hash
-    part = ModsecurityAuditLogParser::ReducedMultipartRequestBodyPart.new
-    CONTENT.each_line do |line|
-      part.add(line)
-    end
+    part = add(ModsecurityAuditLogParser::ReducedMultipartRequestBodyPart.new, CONTENT)
     assert_equal(
       {reduce_multipart_request_body: CONTENT},
       {}.merge(part)
@@ -228,25 +212,21 @@ __EOM__
 end
 
 class MultipartFilesInformationPartTest < Minitest::Test
+  include PartTestHelper
+
   CONTENT = <<__EOM__
 TODO: not captured yet
 
 __EOM__
 
   def test_add
-    part = ModsecurityAuditLogParser::MultipartFilesInformationPart.new
-    CONTENT.each_line do |line|
-      part.add(line)
-    end
+    part = add(ModsecurityAuditLogParser::MultipartFilesInformationPart.new, CONTENT)
     assert_equal 'J', part.type
     assert_equal CONTENT, part.content
   end
 
   def test_hash
-    part = ModsecurityAuditLogParser::MultipartFilesInformationPart.new
-    CONTENT.each_line do |line|
-      part.add(line)
-    end
+    part = add(ModsecurityAuditLogParser::MultipartFilesInformationPart.new, CONTENT)
     assert_equal(
       {multipart_files_information: CONTENT},
       {}.merge(part)
@@ -255,25 +235,21 @@ __EOM__
 end
 
 class MatchedRulesInformationPartTest < Minitest::Test
+  include PartTestHelper
+
   CONTENT = <<__EOM__
 TODO: not captured yet
 
 __EOM__
 
   def test_add
-    part = ModsecurityAuditLogParser::MatchedRulesInformationPart.new
-    CONTENT.each_line do |line|
-      part.add(line)
-    end
+    part = add(ModsecurityAuditLogParser::MatchedRulesInformationPart.new, CONTENT)
     assert_equal 'K', part.type
     assert_equal CONTENT, part.content
   end
 
   def test_hash
-    part = ModsecurityAuditLogParser::MatchedRulesInformationPart.new
-    CONTENT.each_line do |line|
-      part.add(line)
-    end
+    part = add(ModsecurityAuditLogParser::MatchedRulesInformationPart.new, CONTENT)
     assert_equal(
       {matched_rules_information: CONTENT},
       {}.merge(part)
@@ -282,23 +258,19 @@ __EOM__
 end
 
 class AuditLogFooterPartTest < Minitest::Test
+  include PartTestHelper
+
   CONTENT = <<__EOM__
 
 __EOM__
 
   def test_add
-    part = ModsecurityAuditLogParser::AuditLogFooterPart.new
-    CONTENT.each_line do |line|
-      part.add(line)
-    end
+    part = add(ModsecurityAuditLogParser::AuditLogFooterPart.new, CONTENT)
     assert_equal 'Z', part.type
   end
 
   def test_hash
-    part = ModsecurityAuditLogParser::AuditLogFooterPart.new
-    CONTENT.each_line do |line|
-      part.add(line)
-    end
+    part = add(ModsecurityAuditLogParser::AuditLogFooterPart.new, CONTENT)
     assert_equal({}, {}.merge(part))
   end
 end
@@ -343,8 +315,7 @@ __EOM__
   end
 
   def test_parse
-    parser = ModsecurityAuditLogParser.new
-    parser.parse(CONTENT)
+    parser = parse(ModsecurityAuditLogParser.new, CONTENT)
     log = parser.shift
     assert_equal '23/May/2017:07:44:10 +0000', log.timestamp
     assert_equal 'mcAcAcecAcAcAbAcAcAcAcmo', log.unique_transaction_id
@@ -386,9 +357,7 @@ __EOM__
   end
 
   def test_parse_skip
-    parser = ModsecurityAuditLogParser.new('AH')
-    parser.parse(CONTENT)
-    log = parser.shift
+    log = parse(ModsecurityAuditLogParser.new('AH'), CONTENT).shift
     assert_equal '23/May/2017:07:44:10 +0000', log.timestamp
     assert_equal '23/May/2017:07:44:10 +0000', log.audit_log_header.timestamp
     assert_nil log.request_headers
@@ -399,13 +368,10 @@ __EOM__
     assert_nil log.reduced_multipart_request_body
     assert_nil log.multipart_files_information
     assert_nil log.matched_rules_information
-    assert_nil parser.shift
   end
 
   def test_to_h
-    parser = ModsecurityAuditLogParser.new
-    parser.parse(CONTENT)
-    log = parser.shift
+    log = parse(ModsecurityAuditLogParser.new, CONTENT).shift
     assert_equal(
       {
         timestamp: "23/May/2017:07:44:10 +0000",
@@ -453,5 +419,14 @@ Warning. Match of \"eq 0\" against \"REQBODY_ERROR\" required. [file \"/path/to/
       },
       log.to_h
     )
+  end
+
+private
+
+  def parse(parser, content)
+    content.each_line do |line|
+      parser.parse(line)
+    end
+    parser
   end
 end
