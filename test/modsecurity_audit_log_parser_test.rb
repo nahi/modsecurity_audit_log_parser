@@ -363,7 +363,16 @@ __EOM__
     assert_nil log.reduced_multipart_request_body
     assert_nil log.multipart_files_information
     assert_nil log.matched_rules_information
+    assert_equal 1495525450, log.time # 23/May/2017:07:44:10 +0000
+
     assert_nil parser.shift
+  end
+
+  def test_parse_broken_timestamp
+    assert_equal 0, parse(ModsecurityAuditLogParser.new, <<__EOM__).shift.time # May 32 -> 0
+--2e793d5f-A--
+[32/May/2017:07:44:10 +0000] mcAcAcecAcAcAbAcAcAcAcmo 123.45.67.8 60491 127.0.0.1 80
+__EOM__
   end
 
   def test_parse_each_line

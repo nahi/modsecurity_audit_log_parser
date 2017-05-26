@@ -1,4 +1,5 @@
-require "modsecurity_audit_log_parser/version"
+require 'modsecurity_audit_log_parser/version'
+require 'date'
 
 class ModsecurityAuditLogParser
   class Log
@@ -11,6 +12,13 @@ class ModsecurityAuditLogParser
 
     def add(part)
       @parts[part.type] = part
+    end
+
+    MODSEC_TIMESTAMP_FORMAT = '%d/%b/%Y:%H:%M:%S %z'
+    def time
+      if ts = audit_log_header&.timestamp
+        DateTime.strptime(ts, MODSEC_TIMESTAMP_FORMAT).to_time.to_i rescue 0
+      end
     end
 
     [:timestamp, :unique_transaction_id, :source_ip_address, :source_port, :destination_ip_address, :destination_port].each do |name|
@@ -132,9 +140,9 @@ class ModsecurityAuditLogParser
     attr_reader :timestamp, :unique_transaction_id, :source_ip_address, :source_port, :destination_ip_address, :destination_port
 
     def add(line)
-      time, _ = line.chomp.split(/\] /, 2)
-      @timestamp = time.sub(/\[/, '')
-      @unique_transaction_id, @source_ip_address, @source_port, @destination_ip_address, @destination_port = _.split(/ /, 5)
+      datetime, rest = line.chomp.split(/\] /, 2)
+      @timestamp = datetime.sub(/\[/, '')
+      @unique_transaction_id, @source_ip_address, @source_port, @destination_ip_address, @destination_port = rest.split(/ /, 5)
     end
 
     def merge!(hash)
@@ -273,8 +281,10 @@ class ModsecurityAuditLogParser
         @part.add(line) if @part
       end
     end
+    self
   end
 
+  # Caller makes sure that all stream was passed to `parse`
   def shift(*a)
     @records.shift(*a)
   end
