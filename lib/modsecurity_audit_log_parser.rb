@@ -16,27 +16,29 @@ class ModsecurityAuditLogParser
 
     MODSEC_TIMESTAMP_FORMAT = '%d/%b/%Y:%H:%M:%S %z'
     def time
-      if ts = audit_log_header&.timestamp
-        DateTime.strptime(ts, MODSEC_TIMESTAMP_FORMAT).to_time.to_i rescue 0
+      if ah = audit_log_header
+        if ts = ah.timestamp
+          DateTime.strptime(ts, MODSEC_TIMESTAMP_FORMAT).to_time.to_i rescue 0
+        end
       end
     end
 
     [:timestamp, :unique_transaction_id, :source_ip_address, :source_port, :destination_ip_address, :destination_port].each do |name|
       define_method(name) do
-        audit_log_header&.send(name)
+        audit_log_header.send(name)
       end
     end
 
     def trailers
-      audit_log_trailer&.trailers
+      audit_log_trailer.trailers
     end
 
     def rules
-      audit_log_trailer&.rules
+      audit_log_trailer.rules
     end
 
     def audit_log_header
-      @parts['A']
+      @parts['A'] || EMPTY_AUDIT_LOG_HEADER
     end
 
     def request_headers
@@ -56,7 +58,7 @@ class ModsecurityAuditLogParser
     end
 
     def audit_log_trailer
-      @parts['H']
+      @parts['H'] || EMPTY_AUDIT_LOG_TRAILER
     end
 
     def reduced_multipart_request_body
@@ -154,6 +156,7 @@ class ModsecurityAuditLogParser
       hash[:destination_port] = @destination_port
     end
   end
+  EMPTY_AUDIT_LOG_HEADER = AuditLogHeaderPart.new
 
   class RequestHeadersPart < ContentPart
     register('B', self)
@@ -206,11 +209,13 @@ class ModsecurityAuditLogParser
     end
 
     def rules
-      if pairs = @trailers[:Message]&.scan(/\[(\w+) "([^\\"]*(?:\\.[^\\"]*)*)"\]/)
-        pairs.inject({}) { |r, (k, v)|
-          r["rule_#{k}".intern] = v
-          r
-        }
+      if message = @trailers[:Message]
+        if pairs = message.scan(/\[(\w+) "([^\\"]*(?:\\.[^\\"]*)*)"\]/)
+          pairs.inject({}) { |r, (k, v)|
+            r["rule_#{k}".intern] = v
+            r
+          }
+        end
       end
     end
 
@@ -221,6 +226,7 @@ class ModsecurityAuditLogParser
       end
     end
   end
+  EMPTY_AUDIT_LOG_TRAILER = AuditLogTrailerPart.new
 
   class ReducedMultipartRequestBodyPart < ContentPart
     register('I', self)
