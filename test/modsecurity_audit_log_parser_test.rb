@@ -398,13 +398,13 @@ Connection: keep-alive
         Message: "Warning. Match of \"eq 0\" against \"REQBODY_ERROR\" required. [file \"/path/to/conf.d/modsecurity.conf\"] [line \"60\"] [id \"200002\"] [msg \"Failed to parse request body.\"] [data \"\"] [severity \"CRITICAL\"]
 Warning. Match of \"eq 0\" against \"REQBODY_ERROR\" required. [file \"/path/to/conf.d/owasp-modsecurity-crs/rules/REQUEST-920-PROTOCOL-ENFORCEMENT.conf\"] [line \"157\"] [id \"920130\"] [rev \"1\"] [msg \"Failed to parse request body.\"] [data \"\"] [severity \"CRITICAL\"] [ver \"OWASP_CRS/3.0.0\"] [maturity \"9\"] [accuracy \"9\"] [tag \"application-multi\"] [tag \"language-multi\"] [tag \"platform-multi\"] [tag \"attack-protocol\"] [tag \"OWASP_CRS/PROTOCOL_VIOLATION/INVALID_REQ\"] [tag \"CAPEC-272\"]
 ",
-        "Apache-Handler": "IIS",
+        :"Apache-Handler" => "IIS",
         Stopwatch: "1495601080000788 792314 (- - -)",
         Stopwatch2: "1495601080000788 792314; combined=1704, p1=313, p2=1178, p3=68, p4=105, p5=40, sr=45, sw=0, l=0, gc=0",
-        "Response-Body-Transformed": "Dechunked",
+        :"Response-Body-Transformed" => "Dechunked",
         Producer: "ModSecurity for nginx (STABLE)/2.9.0 (http://www.modsecurity.org/); OWASP_CRS/3.0.2.",
         Server: "ModSecurity Standalone",
-        "Engine-Mode": "\"DETECTION_ONLY\"",
+        :"Engine-Mode" => "\"DETECTION_ONLY\"",
         rule_file: "/path/to/conf.d/owasp-modsecurity-crs/rules/REQUEST-920-PROTOCOL-ENFORCEMENT.conf",
         rule_line: "157",
         rule_id: "920130",
