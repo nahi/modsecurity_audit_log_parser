@@ -275,8 +275,8 @@ class ModsecurityAuditLogParser
         id, type = $1, $2
         if @log.nil? or @log.id != id
           @log = Log.new(id)
-          @records << @log
         end
+        @records << @log if type == 'Z'
         unless @targets.include?(type)
           @part = nil
           next
