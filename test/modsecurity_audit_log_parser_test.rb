@@ -359,7 +359,7 @@ __EOM__
   end
 
   def test_parse_skip
-    log = parse(ModsecurityAuditLogParser.new('AH'), CONTENT).shift
+    log = parse(ModsecurityAuditLogParser.new(targets: 'AH'), CONTENT).shift
     assert_equal '23/May/2017:07:44:10 +0000', log.timestamp
     assert_equal '23/May/2017:07:44:10 +0000', log.audit_log_header.timestamp
     assert_nil log.request_headers
@@ -373,7 +373,7 @@ __EOM__
   end
 
   def test_shift_returns_log_after_footer
-    assert_nil parse(ModsecurityAuditLogParser.new('AH'), <<__EOM__).shift
+    assert_nil parse(ModsecurityAuditLogParser.new(targets: 'AH'), <<__EOM__).shift
 --2e793d5f-A--
 [23/May/2017:07:44:10 +0000] mcAcAcecAcAcAbAcAcAcAcmo 123.45.67.8 60491 127.0.0.1 80
 __EOM__

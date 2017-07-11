@@ -264,7 +264,7 @@ class ModsecurityAuditLogParser
     end
   end
 
-  def initialize(targets = 'ABCEFHIJKZ')
+  def initialize(targets: 'ABCEFHIJKZ')
     @targets = targets.split('')
     @records = []
   end
