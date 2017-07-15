@@ -298,7 +298,7 @@ class ModsecurityAuditLogParser
       def initialize(json)
         @tran = json[:transaction] || {}
         @producer = @tran[:producer] || {}
-        @msg = (@tran[:messages] || []).first
+        @msg = (@tran[:messages] || []).first || {}
         @detail = @msg[:details] || {}
       end
 
@@ -352,7 +352,7 @@ class ModsecurityAuditLogParser
         json = JSON.parse(@buf, symbolize_names: true, create_additions: false)
         yield Log.new(json)
         @buf.clear
-      rescue
+      rescue JSON::ParserError
         # incomplete
       end
     end

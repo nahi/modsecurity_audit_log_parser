@@ -151,6 +151,14 @@ __EOM__
     assert_equal 'event-correlation', hash[:messages].last[:details][:tags].first
   end
 
+  def test_ignore_incomplete_str
+    parser = ModsecurityAuditLogParser.new(format: 'JSON').parse(LOG_1[0, 100])
+    assert_nil parser.shift
+    parser.parse(LOG_1[101, LOG_1.length - 100])
+    log = parser.shift
+    assert_equal '149982762313.623639', log.id
+  end
+
 private
 
   def parse(parser, content)
