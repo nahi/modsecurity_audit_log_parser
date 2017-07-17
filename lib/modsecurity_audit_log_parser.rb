@@ -298,6 +298,8 @@ class ModsecurityAuditLogParser
       def initialize(json)
         @tran = json[:transaction] || {}
         @producer = @tran[:producer] || {}
+        @request = @tran[:request] || {}
+        @response = @tran[:response] || {}
         @msg = (@tran[:messages] || []).first || {}
         @detail = @msg[:details] || {}
       end
@@ -320,8 +322,11 @@ class ModsecurityAuditLogParser
           client_port: @tran[:client_port],
           host_ip: @tran[:host_ip],
           host_port: @tran[:host_port],
-          request: @tran[:request], # Hash
-          response: @tran[:response], # Hash
+          request_method: @request[:method],
+          request_uri: @request[:uri],
+          request: @request, # Hash
+          response_http_code: @response[:http_code],
+          response: @response, # Hash
           producer: "#{@producer[:modsecurity]}; #{(@producer[:components] || []).join(', ')}",
           connector: @producer[:connector],
           secrules_engine: @producer[:secrules_engine],
@@ -333,6 +338,8 @@ class ModsecurityAuditLogParser
           rule_tags: (@detail[:tags] || []).join(', '),
           rule_file: @detail[:file],
           rule_line_number: @detail[:lineNumber],
+          rule_match: @detail[:match],
+          rule_reference: @detail[:reference],
           rule_data: @detail[:data],
           rule_severity: @detail[:severity],
           rule_maturity: @detail[:maturity],

@@ -118,7 +118,7 @@ __EOM__
     assert_equal '149982762313.623639', log.id
     # Curent JSON log does not have TZ. Parsing depends on environment TZ config.
     assert_equal Time.parse('Wed Jul 12 02:47:03 2017').to_i, log.time
-    assert_equal 25, log.to_h.size
+    assert_equal 30, log.to_h.size
   end
 
   def test_to_h
@@ -131,12 +131,17 @@ __EOM__
     assert_equal 34992, hash[:client_port]
     assert_equal '127.0.0.1', hash[:host_ip]
     assert_equal 5140, hash[:host_port]
+    assert_equal 'GET', hash[:request_method]
+    assert_equal '/', hash[:request_uri]
+    assert_equal 400, hash[:response_http_code]
     assert_equal 'Nikto', hash[:request][:headers][:'User-Agent']
     assert_equal '96', hash[:response][:headers][:'Content-Length']
     assert_equal 'ModSecurity v3.0.0-alpha (Linux); OWASP_CRS/3.0.2"', hash[:producer]
     assert_equal 'ModSecurity-nginx v0.1.1-beta', hash[:connector]
     assert_equal 'DetectionOnly', hash[:secrules_engine]
     assert_equal 'Found User-Agent associated with security scanner', hash[:rule_message]
+    assert_equal "Matched \"Operator `PmFromFile' with parameter `scanners-user-agents.data' against variable `REQUEST_HEADERS:User-Agent' (Value: `Nikto' )", hash[:rule_match]
+    assert_equal 'o0,5v60,5t:lowercase', hash[:rule_reference]
     assert_equal '913100', hash[:rule_id]
     assert_equal 'OWASP_CRS/3.0.0', hash[:rule_ver]
     assert_equal '2', hash[:rule_rev]
